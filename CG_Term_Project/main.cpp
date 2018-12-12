@@ -1,7 +1,6 @@
 /*
 201402436_JoJeongJin
 */
-
 #include <stdio.h>
 #include <iostream>
 #include <glut.h>
@@ -74,8 +73,9 @@ void move();
 void display();
 void keyboard(unsigned char key, int x, int y);
 void reshape(int w, int h);
-
 //사용할 모든 변수의 끝
+
+//키보드 함수 (이건 물체의 이동에만 관여하게 수정해줘야 한다
 void keyboard(unsigned char key, int x, int y) {
 	if (key == 'q') {
 		view_z += 1; //zoom in
@@ -180,6 +180,34 @@ void display() {
 	gluCylinder(foot4, 2, 2, 10, 20, 5);
 	glPopMatrix();
 	//트램펄린 끝
+
+	//행성 정의 (장애물)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(30, 20, 0);
+	glBindTexture(GL_TEXTURE_2D, ids[2]);
+	gluSphere(sphere, 3, 100, 100);
+
+	glPopMatrix();
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(-30, 30, 0);
+	glBindTexture(GL_TEXTURE_2D, ids[2]);
+	gluSphere(sphere, 3, 100, 100);
+
+	glPopMatrix();
+	//행성 끝
 
 
 
