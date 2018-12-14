@@ -23,7 +23,7 @@ GLUquadric *sphere;
 //사용할 모든 변수 모음
 int view_x = 0;
 int view_y = -70;
-int view_z = 10;
+int view_z = 1;
 //카메라 포지션들
 
 
@@ -68,8 +68,11 @@ GLfloat specular3[] = { 0.1, 0.2, 0.3, 1.0 };
 
 GLfloat shine = 100.0;
 
-int D2= 0;//만약 이 값이 1이 되면 옆에서 2D로 보듯이 보이게 된다.
-int D3 = 1;//초기에는 3D로 보인다.
+int D3 = 1;//초기에는 3D로 보인다. 
+//만약 이 값이 0이 되면 2D로 게임 한다는것
+
+double move_star_x = 0;
+double move_star_y = 0;
 
 
 void move();
@@ -80,25 +83,36 @@ void reshape(int w, int h);
 
 //키보드 함수 (이건 물체의 이동에만 관여하게 수정해줘야 한다
 void keyboard(unsigned char key, int x, int y) {
-	if (key == 'q') {
-		view_z += 1; //zoom in
+	if (D3 == 1) {
+		if (key == 'q') {
+			view_z += 1; //zoom in
+		}
+		else if (key == 'e') {
+			view_z -= 1; // zoom out
+		}
+		else if (key == 'd') {
+			move_star_x+=0.5;
+		}
+		else if (key == 's') {
+			move_star_y-=1;
+		}
+		else if (key == 'a') {
+			move_star_x-=0.5;
+		}
+		else if (key == 'w') {
+			move_star_y+=1;
+		}
+		else if (key == '2') {
+			view_x = 0;
+			view_y = -70;
+			view_z = 0;
+		}
 	}
-	else if (key == 'e') {
-		view_z -= 1; // zoom out
+	else {
+		//2D의 경우 따로 처리해줘야함
 	}
-	else if (key == 'w') {
-		view_y += 1;
-	}
-	else if (key == 'a') {
-		view_x -= 1;
-	}
-	else if (key == 's') {
-		view_y -= 1;
-	}
-	else if (key == 'd') {
-		view_x += 1;
-	}
-
+	
+	/* 중요!! 무조건 이동할 수 있는 범위내에서 이동하여야 함! 이것을 정해주지 않으면 물체가 사라지는 현상 발생!*/
 }
 
 void move() {
@@ -133,7 +147,7 @@ void display() {
 	GLfloat emission_light[] = { 1.0, 1.0, 0.3, 1.0 }; //노란색을 반사
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
 
-	glTranslatef(0, 10, 0);
+	glTranslatef(0+move_star_x, 10+move_star_y, 0);
 	glBindTexture(GL_TEXTURE_2D, ids[0]);
 	gluSphere(sphere, 3, 100, 100);
 
@@ -152,7 +166,7 @@ void display() {
 	glTranslatef(0, 0, -15);
 	glBindTexture(GL_TEXTURE_2D, ids[1]);
 	GLUquadricObj *donut = gluNewQuadric(); //이것이 고리
-	gluDisk(donut, 0.2, 10, 100, 20);
+	gluDisk(donut, 0.2, 50, 100, 20);
 	glPopMatrix();
 
 	glPushMatrix();
