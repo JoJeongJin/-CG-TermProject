@@ -68,6 +68,9 @@ GLfloat specular3[] = { 0.1, 0.2, 0.3, 1.0 };
 
 GLfloat shine = 100.0;
 
+int D2= 0;//만약 이 값이 1이 되면 옆에서 2D로 보듯이 보이게 된다.
+int D3 = 1;//초기에는 3D로 보인다.
+
 
 void move();
 void display();
