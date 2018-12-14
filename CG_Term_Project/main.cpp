@@ -2,14 +2,16 @@
 201402436_JoJeongJin
 */
 #include <stdio.h>
+#include <windows.h>
 #include <iostream>
 #include <glut.h>
 #include <glu.h> 
-/*텍스쳐 관련*/
-//라이브러리 셋팅
 #include <glaux.h>
 #pragma comment(lib, "glaux.lib")
 #pragma comment(lib, "legacy_stdio_definitions.lib")
+#define INIT_MOVESPEED 0.004
+
+using namespace std;
 
 //전역 변수로 입체 오브젝트 생성
 unsigned int ids[17];
@@ -68,13 +70,17 @@ GLfloat specular3[] = { 0.1, 0.2, 0.3, 1.0 };
 
 GLfloat shine = 100.0;
 
-int D3 = 1;//초기에는 3D로 보인다. 
-//만약 이 값이 0이 되면 2D로 게임 한다는것
+int D3 = 1;//초기에는 3D로 보인다. //만약 이 값이 0이 되면 2D로 게임 한다는것
+
+int bounce = 0; //만약 bounce가 1이 된다면 튀어오르는 상태로 만들어 주면 된다. 처음에는 하강하는 상태기 때문에 bounce는 0이다.
+double move_speed = 0.004; //움직임 속도는 이정도로 고정된다. 중력 가속도를 구현해주어야 한다.
+double jumb_height = 10; //초기에는 10이다가 점점 트램펄린을 뛸 때마다 거리가 늘어남
 
 double move_star_x = 0;
 double move_star_y = 0;
+double move_star_z = 0;
 
-
+void crash();
 void move();
 void display();
 void keyboard(unsigned char key, int x, int y);
@@ -105,7 +111,7 @@ void keyboard(unsigned char key, int x, int y) {
 		else if (key == '2') {
 			view_x = 0;
 			view_y = -70;
-			view_z = 0;
+			view_z = 1;
 		}
 	}
 	else {
@@ -114,9 +120,35 @@ void keyboard(unsigned char key, int x, int y) {
 	
 	/* 중요!! 무조건 이동할 수 있는 범위내에서 이동하여야 함! 이것을 정해주지 않으면 물체가 사라지는 현상 발생!*/
 }
+void crash() {
+	//두 물체의 중심간 3차원 거리의 합이 두 물체의 반지름의 합보다 작으면 충돌로 판별하는 것
+}
 
 void move() {
-	
+
+	if (bounce == 0) {
+		if (move_star_z > -18) {
+			move_star_z -= move_speed; //속도가 증가하다가 특정 위치에 오면 0으로 만든다음 다시 튀어 오르게 한다.
+			move_speed += 0.00005;
+		}
+		else {
+			move_speed = INIT_MOVESPEED;
+			Sleep(100);
+			bounce = 1;
+		}
+	}
+	else {//튀어 오르는 상태로 변화 했을 때, 즉 bounce가 1일 때
+		if (move_star_z < 50) {
+			move_star_z += move_speed;
+			move_speed += 0.00005;
+		}
+		else {
+			move_speed = INIT_MOVESPEED;
+			Sleep(200);
+			bounce = 0;
+		}
+	}
+
 }
 
 void display() {
@@ -124,7 +156,7 @@ void display() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(view_x, view_y, view_z, 0, 0, 0, 0, 1, 0);
-
+	move();
 	//연산의 시작
 
 
@@ -133,7 +165,6 @@ void display() {
 
 	//별 정의
 	glPushMatrix();
-
 	glEnable(GL_LIGHTING);  //Lighting을 사용함
 	glEnable(GL_LIGHT0); //Light 0를 사용함 (0번째 조명)
 	glEnable(GL_TEXTURE_2D); //텍스쳐를 사용함
@@ -147,7 +178,7 @@ void display() {
 	GLfloat emission_light[] = { 1.0, 1.0, 0.3, 1.0 }; //노란색을 반사
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
 
-	glTranslatef(0+move_star_x, 10+move_star_y, 0);
+	glTranslatef(0+move_star_x, 10+move_star_y, move_star_z);
 	glBindTexture(GL_TEXTURE_2D, ids[0]);
 	gluSphere(sphere, 3, 100, 100);
 
@@ -225,7 +256,6 @@ void display() {
 
 	glPopMatrix();
 	//행성 끝
-
 
 
 /*	
@@ -346,10 +376,9 @@ void main(int argc, char** argv) {
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 
-
+	move();
 	glutIdleFunc(display);//Idle시간에 계속해서 작동하는 함수
 	glutKeyboardFunc(keyboard);
-
 
 	glutMainLoop();
 }
