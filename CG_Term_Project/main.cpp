@@ -74,14 +74,14 @@ int D3 = 1;//초기에는 3D로 보인다. //만약 이 값이 0이 되면 2D로 게임 한다는것
 
 int bounce = 0; //만약 bounce가 1이 된다면 튀어오르는 상태로 만들어 주면 된다. 처음에는 하강하는 상태기 때문에 bounce는 0이다.
 double move_speed = 0.004; //움직임 속도는 이정도로 고정된다. 중력 가속도를 구현해주어야 한다.
-double jumb_height = 10; //초기에는 10이다가 점점 트램펄린을 뛸 때마다 거리가 늘어남
+double jump_height = 10; //초기에는 10이다가 점점 트램펄린을 뛸 때마다 거리가 늘어남
 
 double move_star_x = 0;
 double move_star_y = 0;
 double move_star_z = 0;
 
 void crash();
-void move();
+void star_move();//구현 완료
 void display();
 void keyboard(unsigned char key, int x, int y);
 void reshape(int w, int h);
@@ -124,7 +124,7 @@ void crash() {
 	//두 물체의 중심간 3차원 거리의 합이 두 물체의 반지름의 합보다 작으면 충돌로 판별하는 것
 }
 
-void move() {
+void star_move() {
 
 	if (bounce == 0) {
 		if (move_star_z > -18) {
@@ -138,11 +138,15 @@ void move() {
 		}
 	}
 	else {//튀어 오르는 상태로 변화 했을 때, 즉 bounce가 1일 때
-		if (move_star_z < 50) {
+		if (move_star_z < jump_height) {
+			if (jump_height == 200) {
+				//클리어 조건
+			}
 			move_star_z += move_speed;
 			move_speed += 0.00005;
 		}
 		else {
+			jump_height += 10;
 			move_speed = INIT_MOVESPEED;
 			Sleep(200);
 			bounce = 0;
@@ -156,7 +160,7 @@ void display() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(view_x, view_y, view_z, 0, 0, 0, 0, 1, 0);
-	move();
+	star_move();
 	//연산의 시작
 
 
@@ -376,7 +380,7 @@ void main(int argc, char** argv) {
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 
-	move();
+	star_move();
 	glutIdleFunc(display);//Idle시간에 계속해서 작동하는 함수
 	glutKeyboardFunc(keyboard);
 
