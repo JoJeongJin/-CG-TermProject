@@ -9,7 +9,9 @@
 #include <glaux.h>
 #pragma comment(lib, "glaux.lib")
 #pragma comment(lib, "legacy_stdio_definitions.lib")
+
 #define INIT_MOVESPEED 0.004
+#define CLEAR_HEIGHT 200
 
 using namespace std;
 
@@ -25,7 +27,7 @@ GLUquadric *sphere;
 //사용할 모든 변수 모음
 int view_x = 0;
 int view_y = -70;
-int view_z = 1;
+int view_z = 7;
 //카메라 포지션들
 
 
@@ -70,7 +72,6 @@ GLfloat specular3[] = { 0.1, 0.2, 0.3, 1.0 };
 
 GLfloat shine = 100.0;
 
-int D3 = 1;//초기에는 3D로 보인다. //만약 이 값이 0이 되면 2D로 게임 한다는것
 
 int bounce = 0; //만약 bounce가 1이 된다면 튀어오르는 상태로 만들어 주면 된다. 처음에는 하강하는 상태기 때문에 bounce는 0이다.
 double move_speed = 0.004; //움직임 속도는 이정도로 고정된다. 중력 가속도를 구현해주어야 한다.
@@ -89,7 +90,7 @@ void reshape(int w, int h);
 
 //키보드 함수 (이건 물체의 이동에만 관여하게 수정해줘야 한다
 void keyboard(unsigned char key, int x, int y) {
-	if (D3 == 1) {
+	
 		if (key == 'q') {
 			view_z += 1; //zoom in
 		}
@@ -108,15 +109,18 @@ void keyboard(unsigned char key, int x, int y) {
 		else if (key == 'w') {
 			move_star_y+=1;
 		}
-		else if (key == '2') {
+		else if (key == '2') { //2D의 경우
+			view_x = 0;
+			view_y = 1;
+			view_z = 50;
+		}
+		else if (key == '1') {//3D의 경우
 			view_x = 0;
 			view_y = -70;
-			view_z = 1;
+			view_z = 6;
 		}
-	}
-	else {
-		//2D의 경우 따로 처리해줘야함
-	}
+	
+	
 	
 	/* 중요!! 무조건 이동할 수 있는 범위내에서 이동하여야 함! 이것을 정해주지 않으면 물체가 사라지는 현상 발생!*/
 }
@@ -139,9 +143,6 @@ void star_move() {
 	}
 	else {//튀어 오르는 상태로 변화 했을 때, 즉 bounce가 1일 때
 		if (move_star_z < jump_height) {
-			if (jump_height == 200) {
-				//클리어 조건
-			}
 			move_star_z += move_speed;
 			move_speed += 0.00005;
 		}
@@ -150,6 +151,10 @@ void star_move() {
 			move_speed = INIT_MOVESPEED;
 			Sleep(200);
 			bounce = 0;
+			if (jump_height == CLEAR_HEIGHT && bounce == 0) {
+				MessageBox(NULL, "행성 탈출에 성공하였습니다!! -끝-", "게임 클리어!", MB_OK);
+				exit(0);
+			}//클리어 조건 달성시
 		}
 	}
 
@@ -161,6 +166,7 @@ void display() {
 	glLoadIdentity();
 	gluLookAt(view_x, view_y, view_z, 0, 0, 0, 0, 1, 0);
 	star_move();
+	//glOrtho(-1, 1, -1, 1, 1, 4);
 	//연산의 시작
 
 
@@ -182,7 +188,7 @@ void display() {
 	GLfloat emission_light[] = { 1.0, 1.0, 0.3, 1.0 }; //노란색을 반사
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
 
-	glTranslatef(0+move_star_x, 10+move_star_y, move_star_z);
+	glTranslatef(0+move_star_x, 10+move_star_y, 5);
 	glBindTexture(GL_TEXTURE_2D, ids[0]);
 	gluSphere(sphere, 3, 100, 100);
 
@@ -196,9 +202,9 @@ void display() {
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
 	glMaterialf(GL_FRONT, GL_SHININESS, shine);
 
-	GLfloat emission_material[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat emission_material[] = { 0.2, 0.2, 0.0, 1.0 };
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
-	glTranslatef(0, 0, -15);
+	glTranslatef(0, 0, -15 - move_star_z);
 	glBindTexture(GL_TEXTURE_2D, ids[1]);
 	GLUquadricObj *donut = gluNewQuadric(); //이것이 고리
 	gluDisk(donut, 0.2, 50, 100, 20);
@@ -210,24 +216,24 @@ void display() {
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
 
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
-	glTranslatef(0, 8, -25);
+	glTranslatef(0, 8, -25 - move_star_z);
 	GLUquadricObj *foot = gluNewQuadric(); //이것이 다리
 	gluCylinder(foot, 2, 2, 10, 20, 5);
 	glPopMatrix();
 
 
 	glPushMatrix();
-	glTranslatef(6, 0, -25);
+	glTranslatef(6, 0, -25-move_star_z);
 	GLUquadricObj *foot2 = gluNewQuadric(); //이것이 다리
 	gluCylinder(foot2, 2, 2, 10, 20, 5);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(-6, 0, -25);
+	glTranslatef(-6, 0, -25 - move_star_z);
 	GLUquadricObj *foot3 = gluNewQuadric(); //이것이 다리
 	gluCylinder(foot3, 2, 2, 10, 20, 5);
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0, -6, -25);
+	glTranslatef(0, -6, -25-move_star_z);
 	GLUquadricObj *foot4 = gluNewQuadric(); //이것이 다리
 	gluCylinder(foot4, 2, 2, 10, 20, 5);
 	glPopMatrix();
@@ -241,7 +247,7 @@ void display() {
 	glMaterialf(GL_FRONT, GL_SHININESS, shine);
 
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
-	glTranslatef(30, 20, 0);
+	glTranslatef(30, 20, -move_star_z);
 	glBindTexture(GL_TEXTURE_2D, ids[2]);
 	gluSphere(sphere, 3, 100, 100);
 
@@ -254,7 +260,7 @@ void display() {
 	glMaterialf(GL_FRONT, GL_SHININESS, shine);
 
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
-	glTranslatef(-30, 30, 0);
+	glTranslatef(-30, 30, -move_star_z);
 	glBindTexture(GL_TEXTURE_2D, ids[2]);
 	gluSphere(sphere, 3, 100, 100);
 
@@ -279,7 +285,7 @@ void reshape(int w, int h) {
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45, ratio, 10, 100);
+	gluPerspective(45, ratio, 1, 1000);
 }
 
 void main(int argc, char** argv) {
