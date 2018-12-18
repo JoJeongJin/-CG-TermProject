@@ -7,6 +7,7 @@
 #include <glut.h>
 #include <glu.h> 
 #include <glaux.h>
+#include <math.h>
 #pragma comment(lib, "glaux.lib")
 #pragma comment(lib, "legacy_stdio_definitions.lib")
 
@@ -81,18 +82,28 @@ double move_star_x = 0;
 double move_star_y = 0;
 double move_star_z = 0;
 
+double ob_x[10] = {-30, 30, -20, 20, -10, 10, -5, 5 , 0, 0 }; //10개의 장애물 x위치 값 저장
+double ob_y[10] = { 10, 9 ,8, 7, 6, 5, 4, 3, 2, 1 }; //10개의 장애물 y위치 값 저장
+double ob_z[10] = { 10, 30, 50, 70, 90, 110, 130 , 150, 170, 190 };//10개의 장애물 z위치 값 저장
+int go_left_x[10] = { 0,1,0,1,0,1,0,1,0,1 }; //1이면 왼쪽으로 가는 것이고 0이면 오른쪽으로 가고 있는 것
+int go_bottom_y[10] = { 0,1,0,1,0,1,0,1,0,1 }; //1이면 아래쪽으로 가는 것이고 0이면 위쪽으로 가고 있다는 것
+
+double move_planet_speed = 0.01;//이 속도로 초기화
+
+
 void crash();
+void move_planet();
 void star_move();//구현 완료
 void display();
-void keyboard(unsigned char key, int x, int y);
-void reshape(int w, int h);
+void keyboard(unsigned char key, int x, int y);//구현완료
+void reshape(int w, int h);//구현 완료
 //사용할 모든 변수의 끝
 
 //키보드 함수 (이건 물체의 이동에만 관여하게 수정해줘야 한다
 void keyboard(unsigned char key, int x, int y) {
 		if (key == 'd') {
 			if (move_star_x <= 25) 
-			move_star_x+=0.5;
+			move_star_x+=1;
 		}
 		else if (key == 's') {
 			if (move_star_y >= -15) 
@@ -100,7 +111,7 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		else if (key == 'a') {
 			if (move_star_x >= -25) 
-			move_star_x-=0.5;
+			move_star_x-=1;
 		}
 		else if (key == 'w') {
 			if (move_star_y <= 15) 
@@ -121,12 +132,21 @@ void keyboard(unsigned char key, int x, int y) {
 
 
 void crash() {
-	//30번 이상 입력 했을 경우
-	if (move_star_y > 30 && move_star_z <= - 18) {
-		//exit(0);
+	for (int i = 0; i < 10; i++) {
+		if ( ((fabs(5-ob_z[i]+move_star_z)) <= 6 )) { //높이 차이가 계산범위 이내에 들어왔을때
+			double x = (ob_x[i] - move_star_x) * (ob_x[i] - move_star_x);
+			double y = (ob_y[i] - move_star_y) * (ob_y[i] - move_star_y);
+			double z = (ob_z[i] - move_star_z - 5) * (ob_z[i] - move_star_z - 5);
+			double distance = (x + y + z);
+			if (distance <= 36) {
+				MessageBox(NULL, "앗! 탈출하는 도중 충돌이 발생하였습니다... 조금 뒤에 다시 탈출시도해보자.", "충돌 발생!", MB_OK);
+				exit(0);
+			}
+		}
 	}
 	//두 물체의 중심간 3차원 거리의 합이 두 물체의 반지름의 합보다 작으면 충돌로 판별하는 것
 }
+
 
 void star_move() {
 
@@ -137,7 +157,7 @@ void star_move() {
 		}
 		else {
 			move_speed = INIT_MOVESPEED;
-			Sleep(100);
+			//Sleep(100);
 			bounce = 1;
 		}
 	}
@@ -149,7 +169,7 @@ void star_move() {
 		else {
 			jump_height += 10;
 			move_speed = INIT_MOVESPEED;
-			Sleep(200);
+			//Sleep(100);
 			bounce = 0;
 			if (jump_height == CLEAR_HEIGHT && bounce == 0) {
 				MessageBox(NULL, "행성 탈출에 성공하였습니다!! -끝-", "게임 클리어!", MB_OK);
@@ -160,17 +180,51 @@ void star_move() {
 
 }
 
+void move_planet() {
+	for (int i = 1; i <= 10; ++i) {
+		if (go_left_x[i-1] == 0) {//오른쪽으로 가는 상태일 때
+			if (ob_x[i-1] < 43) {
+				ob_x[i-1] += (move_planet_speed*i);
+			}
+			else {
+				go_left_x[i-1] = 1;
+			}
+		}
+		else {//왼쪽으로 가는 상태일 때
+			if (ob_x[i-1] > -40) {
+				ob_x[i-1] -= (move_planet_speed*i);
+			}
+			else {
+				go_left_x[i-1] = 0;
+			}
+		}
+		if (go_bottom_y[i-1] == 0) {//위로 (y쪽으로)
+			if (ob_y[i-1] < 20) {
+				ob_y[i-1] += (move_planet_speed*i);
+			}
+			else {
+				go_bottom_y[i-1] = 1;
+			}
+		}
+		else {//아래로 (-y쪽으로)
+			if (ob_y[i-1] > -23) {
+				ob_y[i-1] -= (move_planet_speed*i);
+			}
+			else {
+				go_bottom_y[i-1] = 0;
+			}
+		}
+	}
+}
+
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(view_x, view_y, view_z, 0, 0, 0, 0, 1, 0);
 	star_move();
+	move_planet();
 	crash();
-	//glOrtho(-1, 1, -1, 1, 1, 4);
-	//연산의 시작
-
-
 	//연산의 끝
 
 
@@ -189,7 +243,7 @@ void display() {
 	GLfloat emission_light[] = { 1.0, 1.0, 0.3, 1.0 }; //노란색을 반사
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
 
-	glTranslatef(0+move_star_x, move_star_y, 5);
+	glTranslatef(move_star_x, move_star_y, 5);
 	glBindTexture(GL_TEXTURE_2D, ids[0]);
 	gluSphere(sphere, 3, 100, 100);
 
@@ -246,12 +300,10 @@ void display() {
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
 	glMaterialf(GL_FRONT, GL_SHININESS, shine);
-
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
-	glTranslatef(30, 20, -move_star_z);
+	glTranslatef(ob_x[0], ob_y[0], ob_z[0]-move_star_z);
 	glBindTexture(GL_TEXTURE_2D, ids[2]);
 	gluSphere(sphere, 3, 100, 100);
-
 	glPopMatrix();
 
 	glPushMatrix();
@@ -259,13 +311,23 @@ void display() {
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
 	glMaterialf(GL_FRONT, GL_SHININESS, shine);
-
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
-	glTranslatef(-30, 30, -move_star_z);
+	glTranslatef(ob_x[1], ob_y[1], ob_z[1] -move_star_z);
 	glBindTexture(GL_TEXTURE_2D, ids[2]);
 	gluSphere(sphere, 3, 100, 100);
-
 	glPopMatrix();
+	
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[2], ob_y[2], ob_z[2]-move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[2]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
+	
 	//행성 끝
 
 
@@ -387,7 +449,7 @@ void main(int argc, char** argv) {
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 
-	star_move();
+	
 	glutIdleFunc(display);//Idle시간에 계속해서 작동하는 함수
 	glutKeyboardFunc(keyboard);
 
