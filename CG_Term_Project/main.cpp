@@ -13,6 +13,7 @@
 
 #define INIT_MOVESPEED 0.004
 #define CLEAR_HEIGHT 200
+#define GRAVITY 0.0005
 
 using namespace std;
 
@@ -30,27 +31,6 @@ int view_x = 0;
 int view_y = -70;
 int view_z = 7;
 //카메라 포지션들
-
-
-/*물체의 이동*/
-double star = 0;
-double planet_1 = 0;
-double planet_2 = 0;
-double planet_3 = 0;
-double planet_4 = 0;
-double planet_5 = 0;
-
-double planet_6 = 0;
-double planet_7 = 0;
-double planet_8 = 0;
-double planet_9 = 0;
-double planet_10= 0;
-
-double planet_11= 0;
-double planet_12= 0;
-double planet_13= 0;
-double planet_14= 0;
-double planet_15= 0;
 
 
 /* Star 및 장애물 1, 2, 3을 표현하기 위해 정의한 변수들*/
@@ -75,7 +55,7 @@ GLfloat shine = 100.0;
 
 
 int bounce = 0; //만약 bounce가 1이 된다면 튀어오르는 상태로 만들어 주면 된다. 처음에는 하강하는 상태기 때문에 bounce는 0이다.
-double move_speed = 0.004; //움직임 속도는 이정도로 고정된다. 중력 가속도를 구현해주어야 한다.
+double move_speed = 0.008; //움직임 속도는 이정도로 고정된다. 중력 가속도를 구현해주어야 한다.
 double jump_height = 10; //초기에는 10이다가 점점 트램펄린을 뛸 때마다 거리가 늘어남
 
 double move_star_x = 0;
@@ -88,7 +68,7 @@ double ob_z[10] = { 10, 30, 50, 70, 90, 110, 130 , 150, 170, 190 };//10개의 장애
 int go_left_x[10] = { 0,1,0,1,0,1,0,1,0,1 }; //1이면 왼쪽으로 가는 것이고 0이면 오른쪽으로 가고 있는 것
 int go_bottom_y[10] = { 0,1,0,1,0,1,0,1,0,1 }; //1이면 아래쪽으로 가는 것이고 0이면 위쪽으로 가고 있다는 것
 
-double move_planet_speed = 0.01;//이 속도로 초기화
+double move_planet_speed = 0.05;//이 속도로 초기화
 
 
 void crash();
@@ -138,8 +118,8 @@ void crash() {
 			double y = (ob_y[i] - move_star_y) * (ob_y[i] - move_star_y);
 			double z = (ob_z[i] - move_star_z - 5) * (ob_z[i] - move_star_z - 5);
 			double distance = (x + y + z);
-			if (distance <= 36) {
-				MessageBox(NULL, "앗! 탈출하는 도중 충돌이 발생하였습니다... 조금 뒤에 다시 탈출시도해보자.", "충돌 발생!", MB_OK);
+			if (distance <= 32) {
+				MessageBox(NULL, "앗! 탈출하는 도중 충돌이 발생하였습니다... 조금 뒤에 행성들이 잠잠해진뒤에 다시 탈출을 시도해보자.", "충돌 발생!", MB_OK);
 				exit(0);
 			}
 		}
@@ -153,7 +133,7 @@ void star_move() {
 	if (bounce == 0) {
 		if (move_star_z > -18) {
 			move_star_z -= move_speed; //속도가 증가하다가 특정 위치에 오면 0으로 만든다음 다시 튀어 오르게 한다.
-			move_speed += 0.00005;
+			move_speed += GRAVITY;
 		}
 		else {
 			move_speed = INIT_MOVESPEED;
@@ -164,7 +144,7 @@ void star_move() {
 	else {//튀어 오르는 상태로 변화 했을 때, 즉 bounce가 1일 때
 		if (move_star_z < jump_height) {
 			move_star_z += move_speed;
-			move_speed += 0.00005;
+			move_speed += GRAVITY;
 		}
 		else {
 			jump_height += 10;
@@ -302,7 +282,7 @@ void display() {
 	glMaterialf(GL_FRONT, GL_SHININESS, shine);
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
 	glTranslatef(ob_x[0], ob_y[0], ob_z[0]-move_star_z);
-	glBindTexture(GL_TEXTURE_2D, ids[2]);
+	glBindTexture(GL_TEXTURE_2D, ids[3]);
 	gluSphere(sphere, 3, 100, 100);
 	glPopMatrix();
 
@@ -327,7 +307,83 @@ void display() {
 	glBindTexture(GL_TEXTURE_2D, ids[2]);
 	gluSphere(sphere, 3, 100, 100);
 	glPopMatrix();
-	
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[3], ob_y[3], ob_z[3] - move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[3]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[4], ob_y[4], ob_z[4] - move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[2]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[5], ob_y[5], ob_z[5] - move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[3]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[6], ob_y[6], ob_z[6] - move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[3]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[7], ob_y[7], ob_z[7] - move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[3]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[8], ob_y[8], ob_z[8] - move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[4]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_material);
+	glTranslatef(ob_x[9], ob_y[9], ob_z[9] - move_star_z);
+	glBindTexture(GL_TEXTURE_2D, ids[4]);
+	gluSphere(sphere, 3, 100, 100);
+	glPopMatrix();
 	//행성 끝
 
 
@@ -414,8 +470,8 @@ void main(int argc, char** argv) {
 	/*텍스쳐 추가*/
 
 	//장애물 2 텍스쳐
-	/*
-	tex[3] = auxDIBImageLoad("planet_2.png");
+	
+	tex[3] = auxDIBImageLoad("planet_2.bmp");
 	glGenTextures(3, &ids[3]); 
 	glBindTexture(GL_TEXTURE_2D, ids[3]); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
@@ -423,12 +479,12 @@ void main(int argc, char** argv) {
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, tex[3]->sizeX, tex[3]->sizeY, 0, GL_RGB,
 		GL_UNSIGNED_BYTE, tex[3]->data); 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
-	*/
+	
 
 	
 	//장애물 3 텍스쳐
-	/*
-	tex[4] = auxDIBImageLoad("planet_3.png");
+	
+	tex[4] = auxDIBImageLoad("planet_3.bmp");
 	glGenTextures(3, &ids[4]); 
 	glBindTexture(GL_TEXTURE_2D, ids[4]); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
@@ -436,7 +492,7 @@ void main(int argc, char** argv) {
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, tex[4]->sizeX, tex[4]->sizeY, 0, GL_RGB,
 		GL_UNSIGNED_BYTE, tex[4]->data); 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
-    */
+    
 	
 
 	glClearColor(0, 1, 1, 0); //배경색 지정 G+B
