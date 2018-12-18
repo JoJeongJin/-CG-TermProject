@@ -90,18 +90,20 @@ void reshape(int w, int h);
 
 //키보드 함수 (이건 물체의 이동에만 관여하게 수정해줘야 한다
 void keyboard(unsigned char key, int x, int y) {
-	
-		
 		if (key == 'd') {
+			if (move_star_x <= 25) 
 			move_star_x+=0.5;
 		}
 		else if (key == 's') {
+			if (move_star_y >= -15) 
 			move_star_y-=1;
 		}
 		else if (key == 'a') {
+			if (move_star_x >= -25) 
 			move_star_x-=0.5;
 		}
 		else if (key == 'w') {
+			if (move_star_y <= 15) 
 			move_star_y+=1;
 		}
 		else if (key == '2') { //2D의 경우
@@ -114,11 +116,15 @@ void keyboard(unsigned char key, int x, int y) {
 			view_y = -70;
 			view_z = 7;
 		}
-	
-	
-	
-}
+	}
+			
+
+
 void crash() {
+	//30번 이상 입력 했을 경우
+	if (move_star_y > 30 && move_star_z <= - 18) {
+		//exit(0);
+	}
 	//두 물체의 중심간 3차원 거리의 합이 두 물체의 반지름의 합보다 작으면 충돌로 판별하는 것
 }
 
@@ -160,6 +166,7 @@ void display() {
 	glLoadIdentity();
 	gluLookAt(view_x, view_y, view_z, 0, 0, 0, 0, 1, 0);
 	star_move();
+	crash();
 	//glOrtho(-1, 1, -1, 1, 1, 4);
 	//연산의 시작
 
@@ -182,7 +189,7 @@ void display() {
 	GLfloat emission_light[] = { 1.0, 1.0, 0.3, 1.0 }; //노란색을 반사
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
 
-	glTranslatef(0+move_star_x, 10+move_star_y, 5);
+	glTranslatef(0+move_star_x, move_star_y, 5);
 	glBindTexture(GL_TEXTURE_2D, ids[0]);
 	gluSphere(sphere, 3, 100, 100);
 
