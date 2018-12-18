@@ -91,13 +91,8 @@ void reshape(int w, int h);
 //키보드 함수 (이건 물체의 이동에만 관여하게 수정해줘야 한다
 void keyboard(unsigned char key, int x, int y) {
 	
-		if (key == 'q') {
-			view_z += 1; //zoom in
-		}
-		else if (key == 'e') {
-			view_z -= 1; // zoom out
-		}
-		else if (key == 'd') {
+		
+		if (key == 'd') {
 			move_star_x+=0.5;
 		}
 		else if (key == 's') {
@@ -112,17 +107,16 @@ void keyboard(unsigned char key, int x, int y) {
 		else if (key == '2') { //2D의 경우
 			view_x = 0;
 			view_y = 1;
-			view_z = 50;
+			view_z = 100;
 		}
 		else if (key == '1') {//3D의 경우
 			view_x = 0;
 			view_y = -70;
-			view_z = 6;
+			view_z = 7;
 		}
 	
 	
 	
-	/* 중요!! 무조건 이동할 수 있는 범위내에서 이동하여야 함! 이것을 정해주지 않으면 물체가 사라지는 현상 발생!*/
 }
 void crash() {
 	//두 물체의 중심간 3차원 거리의 합이 두 물체의 반지름의 합보다 작으면 충돌로 판별하는 것
