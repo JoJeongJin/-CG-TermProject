@@ -15,16 +15,16 @@
 #define CLEAR_HEIGHT 200
 #define GRAVITY 0.0005
 
-using namespace std;
-
 //전역 변수로 입체 오브젝트 생성
-unsigned int ids[17];
-AUX_RGBImageRec *tex[17]; /* structure to contain a texture image */
+unsigned int ids[6];
+AUX_RGBImageRec *tex[6]; /* structure to contain a texture image */
 GLUquadric *sphere;
+GLfloat emission_light[] = { 1.0, 1.0, 0.3, 1.0 }; //노란색을 반사
 /*텍스쳐 관련*/
-/* 장애물 15개 3x5*/
+/* 장애물 3개 텍스쳐*/
 /* star 1개*/
 /* 트램펄린 1개*/
+/* 특수효과 1개*/
 
 //사용할 모든 변수 모음
 int view_x = 0;
@@ -71,10 +71,10 @@ int go_bottom_y[10] = { 0,1,0,1,0,1,0,1,0,1 }; //1이면 아래쪽으로 가는 것이고 0�
 double move_planet_speed = 0.05;//이 속도로 초기화
 
 
-void crash();
-void move_planet();
+void crash();//구현완료 (특수효과 까지 구현완료)
+void move_planet();//구현 완료
 void star_move();//구현 완료
-void display();
+void display();//구현 완료
 void keyboard(unsigned char key, int x, int y);//구현완료
 void reshape(int w, int h);//구현 완료
 //사용할 모든 변수의 끝
@@ -119,6 +119,82 @@ void crash() {
 			double z = (ob_z[i] - move_star_z - 5) * (ob_z[i] - move_star_z - 5);
 			double distance = (x + y + z);
 			if (distance <= 32) {
+				glPushMatrix();
+				glEnable(GL_LIGHTING);  //Lighting을 사용함
+				glEnable(GL_LIGHT0); //Light 0를 사용함 (0번째 조명)
+				glEnable(GL_TEXTURE_2D); //텍스쳐를 사용함
+				glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+				glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
+				glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
+				glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
+
+
+
+				glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
+
+				glTranslatef(0, 1000, 1);
+				gluSphere(sphere, 900, 100, 100);
+
+				glPopMatrix();
+
+				glPushMatrix();
+				glEnable(GL_LIGHTING);  //Lighting을 사용함
+				glEnable(GL_LIGHT0); //Light 0를 사용함 (0번째 조명)
+				glEnable(GL_TEXTURE_2D); //텍스쳐를 사용함
+				glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+				glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
+				glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
+				glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
+
+
+				glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
+
+				glTranslatef(0, 0, -1000);
+				gluSphere(sphere, 900, 100, 100);
+
+				glPopMatrix();
+				glPushMatrix();
+				glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+				glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+				glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+				glMaterialf(GL_FRONT, GL_SHININESS, shine);
+				glTranslatef(ob_x[i], ob_y[i], ob_z[i] - move_star_z);
+				glBindTexture(GL_TEXTURE_2D, ids[5]);
+				gluSphere(sphere, 4, 200, 100);
+				glPopMatrix();
+
+				glPushMatrix();
+				glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+				glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+				glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+				glMaterialf(GL_FRONT, GL_SHININESS, shine);
+				glTranslatef(ob_x[i], ob_y[i]+5, ob_z[i] - move_star_z);
+				glBindTexture(GL_TEXTURE_2D, ids[5]);
+				gluSphere(sphere, 4, 200, 100);
+				glPopMatrix();
+				glPushMatrix();
+				glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+				glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+				glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+				glMaterialf(GL_FRONT, GL_SHININESS, shine);
+				glTranslatef(ob_x[i], ob_y[i], ob_z[i]-5 - move_star_z);
+				glBindTexture(GL_TEXTURE_2D, ids[5]);
+				gluSphere(sphere, 6, 200, 100);
+				glPopMatrix();
+				glPushMatrix();
+				glMaterialfv(GL_FRONT, GL_AMBIENT, ambient1);
+				glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse1);
+				glMaterialfv(GL_FRONT, GL_SPECULAR, specular1);
+				glMaterialf(GL_FRONT, GL_SHININESS, shine);
+				glTranslatef(ob_x[i]+5, ob_y[i], ob_z[i] - move_star_z);
+				glBindTexture(GL_TEXTURE_2D, ids[5]);
+				gluSphere(sphere, 3, 200, 100);
+				glPopMatrix();
+				glDisable(GL_TEXTURE_GEN_S);
+				glDisable(GL_TEXTURE_GEN_T);
+				glFlush();
+				Sleep(50);
+				//이상 특수효과들
 				MessageBox(NULL, "앗! 탈출하는 도중 충돌이 발생하였습니다... 조금 뒤에 행성들이 잠잠해진뒤에 다시 탈출을 시도해보자.", "충돌 발생!", MB_OK);
 				exit(0);
 			}
@@ -207,6 +283,40 @@ void display() {
 	crash();
 	//연산의 끝
 
+	glPushMatrix();
+	glEnable(GL_LIGHTING);  //Lighting을 사용함
+	glEnable(GL_LIGHT0); //Light 0를 사용함 (0번째 조명)
+	glEnable(GL_TEXTURE_2D); //텍스쳐를 사용함
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
+
+
+
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
+
+	glTranslatef(0, 1000, 1);
+	gluSphere(sphere, 900, 100, 100);
+
+	glPopMatrix();
+
+	glPushMatrix();
+	glEnable(GL_LIGHTING);  //Lighting을 사용함
+	glEnable(GL_LIGHT0); //Light 0를 사용함 (0번째 조명)
+	glEnable(GL_TEXTURE_2D); //텍스쳐를 사용함
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
+
+
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
+
+	glTranslatef(0, 0, -1000);
+	gluSphere(sphere, 900, 100, 100);
+
+	glPopMatrix();
 
 	//별 정의
 	glPushMatrix();
@@ -220,7 +330,6 @@ void display() {
 
 
 
-	GLfloat emission_light[] = { 1.0, 1.0, 0.3, 1.0 }; //노란색을 반사
 	glMaterialfv(GL_FRONT, GL_EMISSION, emission_light);
 
 	glTranslatef(move_star_x, move_star_y, 5);
@@ -492,6 +601,17 @@ void main(int argc, char** argv) {
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, tex[4]->sizeX, tex[4]->sizeY, 0, GL_RGB,
 		GL_UNSIGNED_BYTE, tex[4]->data); 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
+
+	//충돌 특수효과 텍스쳐
+
+	tex[5] = auxDIBImageLoad("boom.bmp");
+	glGenTextures(3, &ids[5]);
+	glBindTexture(GL_TEXTURE_2D, ids[5]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, tex[5]->sizeX, tex[5]->sizeY, 0, GL_RGB,
+		GL_UNSIGNED_BYTE, tex[5]->data);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     
 	
 
