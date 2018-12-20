@@ -612,10 +612,8 @@ void main(int argc, char** argv) {
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, tex[5]->sizeX, tex[5]->sizeY, 0, GL_RGB,
 		GL_UNSIGNED_BYTE, tex[5]->data);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    
-	
 
-	glClearColor(0, 1, 1, 0); //배경색 지정 G+B
+	glClearColor(0, 1, 1, 0); //배경색을 지정하였지만 텍스쳐에 의하여 보이지 않음
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glColor3f(1.0, 1.0, 1.0);
 
